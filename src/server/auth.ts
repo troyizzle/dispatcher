@@ -5,7 +5,7 @@ import {
   type NextAuthOptions,
   type DefaultSession,
 } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
+import GithubProvider from "next-auth/providers/github";
 import { env } from "@/env.mjs";
 import { prisma } from "@/server/db";
 
@@ -45,12 +45,35 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   },
+  events: {
+    signIn: async ({ user, isNewUser }) => {
+      if (user.email && isNewUser) {
+        const invites = await prisma.orgUserInvite.findMany({
+          where: {
+            email: user.email,
+          }
+        })
+
+        if (invites.length > 0) {
+          await prisma.notification.createMany({
+            data: invites.map((invite) => ({
+              userId: user.id,
+              type: "ORG_USER_INVITE",
+              data: {
+                inviteId: invite.id
+              }
+            }))
+          })
+        }
+      }
+    }
+  },
   adapter: PrismaAdapter(prisma),
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
-    }),
+    GithubProvider({
+      clientId: env.GITHUB_CLIENT_ID,
+      clientSecret: env.GITHUB_CLIENT_SECRET,
+    })
     /**
      * ...add more providers here.
      *
