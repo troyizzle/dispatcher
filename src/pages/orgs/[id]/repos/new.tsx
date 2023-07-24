@@ -63,7 +63,7 @@ function NewRepoForm() {
 
       if (authTokenValue) {
         fetchRepos(authTokenValue).catch(e => {
-          console.error(e)
+          console.error("error", e)
         })
       }
     })
