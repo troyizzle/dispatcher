@@ -8,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
-import { authOptions } from "@/server/auth"
+import {  getServerAuthSession } from "@/server/auth"
 import { prisma } from "@/server/db"
 import { api } from "@/utils/api"
 import { type OrgUserInputNewInput, orgUserInviteNewSchema } from "@/validations/orgUserInvite"
@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { EnumRole } from "@prisma/client"
 import { Loader } from "lucide-react"
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next"
-import { type User, getServerSession } from "next-auth"
+import { type User } from "next-auth"
 import { useRouter } from "next/router"
 import { type FormEvent } from "react"
 import { useForm } from "react-hook-form"
@@ -162,7 +162,7 @@ export default function Page({ user }: PageProps) {
 }
 
 export const getServerSideProps: GetServerSideProps<{ user: User }> = async (context) => {
-  const session = await getServerSession(context.req, context.res, authOptions)
+  const session = await getServerAuthSession(context)
 
   if (!session) {
     return {

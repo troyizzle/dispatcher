@@ -3,7 +3,6 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["jsonProtocol"]
 }
 
 datasource db {
@@ -12,7 +11,9 @@ datasource db {
   // Further reading:
   // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
   // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-  url      = env("DATABASE_URL")
+  url = env("DATABASE_PRISMA_URL") // uses connection pooling
+  directUrl = env("DATABASE_URL_NON_POOLING") // uses a direct connection
+  shadowDatabaseUrl = env("DATABASE_URL_NON_POOLING") // used for migrations
 }
 
 // Necessary for Next auth
@@ -30,6 +31,7 @@ model Account {
   id_token          String? // @db.Text
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refresh_token_expires_in Int?
 
   @@unique([provider, providerAccountId])
 }
